@@ -15,10 +15,12 @@ import cv2
 import numpy as np
 import torch
 import zlib
-
+import math
 # add project directory to python path to enable relative imports
 import os
 import sys
+import open3d as o3d
+
 PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
@@ -32,7 +34,7 @@ import misc.objdet_tools as tools
 
 
 # visualize lidar point-cloud
-def show_pcl(pcl):
+def show_pcl(frame, lidar_name):
 
     ####### ID_S1_EX2 START #######     
     #######
@@ -50,7 +52,7 @@ def show_pcl(pcl):
 
     #######
     ####### ID_S1_EX2 END #######     
-    range_image_to_point_cloud(pcl)
+    range_image_to_point_cloud(frame, lidar_name)
 
     
 # Example C1-5-1 : Load range image
@@ -65,10 +67,10 @@ def load_range_image(frame, lidar_name):
     return ri        
 
 # Example C1-5-6 : Convert range image to 3D point-cloud
-def range_image_to_point_cloud(ri):
+def range_image_to_point_cloud(frame, lidar_name, vis=True):
 
     # extract range values from frame
-    # ri = load_range_image(frame, lidar_name)
+    ri = load_range_image(frame, lidar_name)
     ri[ri<0]=0.0
     ri_range = ri[:,:,0]
 
@@ -116,8 +118,7 @@ def range_image_to_point_cloud(ri):
     pcl_full = np.column_stack((pcl, ri[idx_range, 1]))    
 
     return pcl_full    
-
-        
+  
         
 # visualize range image
 def show_range_image(frame, lidar_name):
