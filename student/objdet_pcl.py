@@ -16,6 +16,7 @@ import torch
 import zlib
 import math
 # add project directory to python path to enable relative imports
+from numpy.lib.function_base import percentile
 import os
 import sys
 import open3d as o3d
@@ -32,15 +33,54 @@ from tools.waymo_reader.simple_waymo_open_dataset_reader import dataset_pb2, lab
 import misc.objdet_tools as tools
 
 
+# visualize range image
+def show_range_image(frame, lidar_name):
+    ####### ID_S1_EX1 START #######     
+    #######
+    print("student task ID_S1_EX1")
+
+    # step 1 : extract lidar data and range image for the roof-mounted lidar
+    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0] # get laser data structure from frame
+
+    # step 2 : extract the range and the intensity channel from the range image
+    ri = dataset_pb2.MatrixFloat()
+    ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))
+    ri = np.array(ri.data).reshape(ri.shape.dims)
+
+    # step 3 : set values <0 to zero
+    ri[ri<0]=0.0
+    
+    # step 4 : map the range channel onto an 8-bit scale and make sure that the full range of values is appropriately considered
+    ri_range = ri[:,:,0]
+    ri_range = ri_range * 255 / (np.amax(ri_range) - np.amin(ri_range))
+    img_range = ri_range.astype(np.uint8)
+    
+    # 不懂!!!!!!
+    # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
+    ri_intensity = ri[:,:,1]
+    percentile_1, percentile_99 = percentile(ri_intensity,1), percentile(ri_intensity,99)
+    ri_intensity = 255 * np.clip(ri_intensity,percentile_1,percentile_99)/percentile_99 
+    img_intensity = ri_intensity.astype(np.uint8)
+    
+    # 不懂!!!!!!
+    # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
+    img_range_intensity = np.vstack((img_range,img_intensity))
+    img_range_intensity = img_range_intensity.astype(np.uint8)
+    
+    #######
+    ####### ID_S1_EX1 END #######     
+    return img_range_intensity
+
+
 # visualize lidar point-cloud
 def show_pcl(frame, lidar_name):
-
     ####### ID_S1_EX2 START #######     
     #######
     print("student task ID_S1_EX2")
-
     # step 1 : initialize open3d with key callback and create window
-    
+    vis_lpc = o3d.visualization.VisualizerWithKeyCallback()
+    vis_lpc.create_window(window_name='Open3D', width=1920, height=1080, left=10, top=10, visible=True)
+    vis_lpc.register_key_callback(262,right_click)
     # step 2 : create instance of open3d point-cloud class
 
     # step 3 : set points in pcd instance by converting the point-cloud into 3d vectors (using open3d function Vector3dVector)
@@ -53,137 +93,12 @@ def show_pcl(frame, lidar_name):
     ####### ID_S1_EX2 END #######     
     range_image_to_point_cloud(frame, lidar_name)
 
-    
-# Example C1-5-1 : Load range image
-def load_range_image(frame, lidar_name):
-    
-    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0] # get laser data structure from frame
-    ri = []
-    if len(lidar.ri_return1.range_image_compressed) > 0: # use first response
-        ri = dataset_pb2.MatrixFloat()
-        ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))
-        ri = np.array(ri.data).reshape(ri.shape.dims)
-    return ri        
+
+def right_click(vis_lpc):
+   
+    return
 
 
-# Example C1-5-6 : Convert range image to 3D point-cloud
-def range_image_to_point_cloud(frame, lidar_name, vis=True):
-
-    # extract range values from frame
-    ri = load_range_image(frame, lidar_name)
-    ri[ri<0]=0.0
-    ri_range = ri[:,:,0]
-
-    # load calibration data
-    calibration = [obj for obj in frame.context.laser_calibrations if obj.name == lidar_name][0]
-
-    # compute vertical beam inclinations
-    height = ri_range.shape[0]
-    inclination_min = calibration.beam_inclination_min
-    inclination_max = calibration.beam_inclination_max
-    inclinations = np.linspace(inclination_min, inclination_max, height)
-    inclinations = np.flip(inclinations)
-
-    # compute azimuth angle and correct it so that the range image center is aligned to the x-axis
-    width = ri_range.shape[1]
-    extrinsic = np.array(calibration.extrinsic.transform).reshape(4,4)
-    az_correction = math.atan2(extrinsic[1,0], extrinsic[0,0])
-    azimuth = np.linspace(np.pi,-np.pi,width) - az_correction
-
-    # expand inclination and azimuth such that every range image cell has its own appropriate value pair
-    azimuth_tiled = np.broadcast_to(azimuth[np.newaxis,:], (height,width))
-    inclination_tiled = np.broadcast_to(inclinations[:,np.newaxis],(height,width))
-
-    # perform coordinate conversion
-    x = np.cos(azimuth_tiled) * np.cos(inclination_tiled) * ri_range
-    y = np.sin(azimuth_tiled) * np.cos(inclination_tiled) * ri_range
-    z = np.sin(inclination_tiled) * ri_range
-
-    # transform 3d points into vehicle coordinate system
-    xyz_sensor = np.stack([x,y,z,np.ones_like(z)])
-    xyz_vehicle = np.einsum('ij,jkl->ikl', extrinsic, xyz_sensor)
-    xyz_vehicle = xyz_vehicle.transpose(1,2,0)
-
-    # extract points with range > 0
-    idx_range = ri_range > 0
-    pcl = xyz_vehicle[idx_range,:3]
- 
-    # visualize point-cloud
-    if vis:
-        pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector(pcl)
-        o3d.visualization.draw_geometries([pcd])
-
-    # stack lidar point intensity as last column
-    pcl_full = np.column_stack((pcl, ri[idx_range, 1]))    
-
-    return pcl_full    
-  
-        
-# visualize range image
-def show_range_image(frame, lidar_name):
-
-    ####### ID_S1_EX1 START #######     
-    #######
-    print("student task ID_S1_EX1")
-
-    # step 1 : extract lidar data and range image for the roof-mounted lidar
-    
-    # step 2 : extract the range and the intensity channel from the range image
-    
-    # step 3 : set values <0 to zero
-    
-    # step 4 : map the range channel onto an 8-bit scale and make sure that the full range of values is appropriately considered
-    
-    # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
-    
-    # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
-    img_range_intensity = [] # remove after implementing all steps
-    #######
-    ####### ID_S1_EX1 END #######     
-    load_range_image(frame, lidar_name)
-    img_range_intensity = vis_range_channel(frame, lidar_name)
-    print("img_range_intensity")
-    return img_range_intensity
-
-
-# Example C1-5-1 : Load range image
-def load_range_image(frame, lidar_name):
-    print("load_range_image")
-    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0] # get laser data structure from frame
-    ri = []
-    if len(lidar.ri_return1.range_image_compressed) > 0: # use first response
-        ri = dataset_pb2.MatrixFloat()
-        ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))
-        ri = np.array(ri.data).reshape(ri.shape.dims)
-    return ri
-
-
-# Example C1-5-4 : Visualize range channel
-def vis_range_channel(frame, lidar_name):
-    print("vis_range_channel")
-    # extract range image from frame
-    ri = load_range_image(frame, lidar_name)
-    ri[ri<0]=0.0
-
-    # map value range to 8bit
-    ri_range = ri[:,:,0]
-    ri_range = ri_range * 255 / (np.amax(ri_range) - np.amin(ri_range))
-    img_range = ri_range.astype(np.uint8)
-
-    # focus on +/- 45° around the image center
-    deg45 = int(img_range.shape[1] / 8)
-    ri_center = int(img_range.shape[1]/2)
-    img_range = img_range[:,ri_center-deg45:ri_center+deg45]
-
-    print('max. val = ' + str(round(np.amax(img_range[:,:]),2)))
-    print('min. val = ' + str(round(np.amin(img_range[:,:]),2)))
-
-    cv2.imshow('range_image', img_range)
-    # cv2.waitKey(0)
-    return img_range
-    
-    
 # create birds-eye view of lidar data
 def bev_from_pcl(lidar_pcl, configs):
 
@@ -369,27 +284,3 @@ def pcl_to_bev(lidar_pcl, configs, vis=True):
                 break
         cv2.destroyAllWindows()
         
-        
-# Exercise C1-5-5 : Visualize intensity channel
-def vis_intensity_channel(frame, lidar_name):
-
-    # extract range image from frame
-    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0] # get laser data structure from frame
-    if len(lidar.ri_return1.range_image_compressed) > 0: # use first response
-        ri = dataset_pb2.MatrixFloat()
-        ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))
-        ri = np.array(ri.data).reshape(ri.shape.dims)
-    ri[ri<0]=0.0
-
-    # map value range to 8bit
-    ri_intensity = ri[:,:,1]
-    ri_intensity = np.amax(ri_intensity)/2 * ri_intensity * 255 / (np.amax(ri_intensity) - np.amin(ri_intensity)) 
-    img_intensity = ri_intensity.astype(np.uint8)
-
-    # focus on +/- 45° around the image center
-    deg45 = int(img_intensity.shape[1] / 8)
-    ri_center = int(img_intensity.shape[1]/2)
-    img_intensity = img_intensity[:,ri_center-deg45:ri_center+deg45]
-
-    cv2.imshow('intensity image', img_intensity)
-    cv2.waitKey(0)
