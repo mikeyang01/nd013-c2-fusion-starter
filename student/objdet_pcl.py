@@ -9,7 +9,6 @@
 # https://www.udacity.com/course/self-driving-car-engineer-nanodegree--nd013
 # ----------------------------------------------------------------------
 #
-
 # general package imports
 import cv2
 import numpy as np
@@ -65,6 +64,7 @@ def load_range_image(frame, lidar_name):
         ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))
         ri = np.array(ri.data).reshape(ri.shape.dims)
     return ri        
+
 
 # Example C1-5-6 : Convert range image to 3D point-cloud
 def range_image_to_point_cloud(frame, lidar_name, vis=True):
@@ -200,7 +200,6 @@ def bev_from_pcl(lidar_pcl, configs):
     ####### ID_S2_EX1 START #######     
     #######
     print("student task ID_S2_EX1")
-    pcl_to_bev(lidar_pcl, configs)
     ## step 1 : compute bev-map discretization by dividing x-range by the bev-image height (see configs)
 
     ## step 2 : create a copy of the lidar pcl and transform all metrix x-coordinates into bev-image coordinates    
@@ -217,7 +216,7 @@ def bev_from_pcl(lidar_pcl, configs):
     ####### ID_S2_EX2 START #######     
     #######
     print("student task ID_S2_EX2")
-
+    pcl_to_bev(lidar_pcl, configs)
     ## step 1 : create a numpy array filled with zeros which has the same dimensions as the BEV map
 
     # step 2 : re-arrange elements in lidar_pcl_cpy by sorting first by x, then y, then -z (use numpy.lexsort)
@@ -279,7 +278,6 @@ def bev_from_pcl(lidar_pcl, configs):
     return input_bev_maps
 
 
-
 # Exercise C2-3-2 : Transform metric point coordinates to BEV space
 def pcl_to_bev(lidar_pcl, configs, vis=True):
 
@@ -331,5 +329,28 @@ def pcl_to_bev(lidar_pcl, configs, vis=True):
             if cv2.waitKey(10) & 0xFF == 27:
                 break
         cv2.destroyAllWindows()
+        
+        
+# Exercise C1-5-5 : Visualize intensity channel
+def vis_intensity_channel(frame, lidar_name):
 
+    # extract range image from frame
+    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0] # get laser data structure from frame
+    if len(lidar.ri_return1.range_image_compressed) > 0: # use first response
+        ri = dataset_pb2.MatrixFloat()
+        ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))
+        ri = np.array(ri.data).reshape(ri.shape.dims)
+    ri[ri<0]=0.0
 
+    # map value range to 8bit
+    ri_intensity = ri[:,:,1]
+    ri_intensity = np.amax(ri_intensity)/2 * ri_intensity * 255 / (np.amax(ri_intensity) - np.amin(ri_intensity)) 
+    img_intensity = ri_intensity.astype(np.uint8)
+
+    # focus on +/- 45° around the image center
+    deg45 = int(img_intensity.shape[1] / 8)
+    ri_center = int(img_intensity.shape[1]/2)
+    img_intensity = img_intensity[:,ri_center-deg45:ri_center+deg45]
+
+    cv2.imshow('intensity image', img_intensity)
+    cv2.waitKey(0)
