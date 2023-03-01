@@ -28,6 +28,7 @@ from tools.objdet_models.resnet.utils.evaluation_utils import decode, post_proce
 
 from tools.objdet_models.darknet.models.darknet2pytorch import Darknet as darknet
 from tools.objdet_models.darknet.utils.evaluation_utils import post_processing_v2
+from tools.objdet_models.resnet.utils.torch_utils import _sigmoid
 
 
 # load model-related parameters into an edict
@@ -177,7 +178,7 @@ def create_model(configs):
 
 # detect trained objects in birds-eye view
 def detect_objects(input_bev_maps, model, configs):
-
+    print("detect_objects")
     # deactivate autograd engine during test to reduce memory usage and speed up computations
     with torch.no_grad():  
 
@@ -186,6 +187,7 @@ def detect_objects(input_bev_maps, model, configs):
 
         # decode model output into target object format
         if 'darknet' in configs.arch:
+            print("darknet detect_objects")
 
             # perform post-processing
             output_post = post_processing_v2(outputs, conf_thresh=configs.conf_thresh, nms_thresh=configs.nms_thresh) 
@@ -200,6 +202,8 @@ def detect_objects(input_bev_maps, model, configs):
                     detections.append([1, x, y, 0.0, 1.50, w, l, yaw])    
 
         elif 'fpn_resnet' in configs.arch:
+            print("fpn_resnet detect_objects")
+
             # decode output and perform post-processing
             
             ####### ID_S3_EX1-5 START #######     
@@ -213,7 +217,9 @@ def detect_objects(input_bev_maps, model, configs):
             detections = detections.cpu().numpy().astype(np.float32)
             # print(detections)
             detections = post_processing(detections, configs)
-            detections = detections[0][1]
+            detections = detections[0][1]         
+            
+            print('detections:')
             print(detections)
             #######
             ####### ID_S3_EX1-5 END #######                 
