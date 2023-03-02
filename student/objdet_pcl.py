@@ -33,6 +33,37 @@ from tools.waymo_reader.simple_waymo_open_dataset_reader import dataset_pb2, lab
 import misc.objdet_tools as tools
 
 
+# visualize lidar point-cloud
+def show_pcl(pcl):
+    ####### ID_S1_EX2 START #######     
+    #######
+    print("student task ID_S1_EX2")
+    # 下面部分要改一下!!!!!!!!
+    # step 1 : initialize open3d with key callback and create window
+    vis = o3d.visualization.VisualizerWithKeyCallback()
+    vis.create_window(window_name='Open3D', width=1920, height=1080, left=10, top=10, visible=True)
+
+    global idx
+    idx= True
+    vis.register_key_callback(262,right_click)
+    
+    # step 2 : create instance of open3d point-cloud class
+    pcd = o3d.geometry.PointCloud()
+
+    # step 3 : set points in pcd instance by converting the point-cloud into 3d vectors (using open3d function Vector3dVector)
+    pcd.points = o3d.utility.Vector3dVector(pcl[:,:3])
+    
+    # step 4 : for the first frame, add the pcd instance to visualization using add_geometry; for all other frames, use update_geometry instead
+    vis.add_geometry(pcd)
+    
+    # step 5 : visualize point cloud and keep window open until right-arrow is pressed (key-code 262)    
+    while idx:
+        vis.poll_events()
+        vis.update_renderer()
+    #######
+    ####### ID_S1_EX2 END #######     
+    
+    
 # visualize range image
 def show_range_image(frame, lidar_name):
     ####### ID_S1_EX1 START #######     
@@ -70,37 +101,6 @@ def show_range_image(frame, lidar_name):
     #######
     ####### ID_S1_EX1 END #######     
     return img_range_intensity
-
-
-# visualize lidar point-cloud
-def show_pcl(pcl):
-    ####### ID_S1_EX2 START #######     
-    #######
-    print("student task ID_S1_EX2")
-    # 下面部分要改一下!!!!!!!!
-    # step 1 : initialize open3d with key callback and create window
-    vis = o3d.visualization.VisualizerWithKeyCallback()
-    vis.create_window(window_name='Open3D', width=1920, height=1080, left=10, top=10, visible=True)
-
-    global idx
-    idx= True
-    vis.register_key_callback(262,right_click)
-    
-    # step 2 : create instance of open3d point-cloud class
-    pcd = o3d.geometry.PointCloud()
-
-    # step 3 : set points in pcd instance by converting the point-cloud into 3d vectors (using open3d function Vector3dVector)
-    pcd.points = o3d.utility.Vector3dVector(pcl[:,:3])
-    
-    # step 4 : for the first frame, add the pcd instance to visualization using add_geometry; for all other frames, use update_geometry instead
-    vis.add_geometry(pcd)
-    
-    # step 5 : visualize point cloud and keep window open until right-arrow is pressed (key-code 262)    
-    while idx:
-        vis.poll_events()
-        vis.update_renderer()
-    #######
-    ####### ID_S1_EX2 END #######     
        
 
 def right_click(vis_lpc):
@@ -204,5 +204,31 @@ def bev_from_pcl(lidar_pcl, configs):
             if cv2.waitKey(0):
                 break
     cv2.destroyAllWindows()
+    
+    
     #######
-    ####### ID_S2_EX3 END #######       
+    ####### ID_S2_EX3 END #######
+    
+    # Compute density layer of the BEV map
+    density_map = np.zeros((configs.bev_height + 1, configs.bev_width + 1))
+    print('lidar_pcl_cpy')
+    print(len(lidar_pcl_cpy))
+
+    _, _, counts = np.unique(lidar_pcl_cpy[:, 0:2], axis=0, return_index=True, return_counts=True)
+    normalizedCounts = np.minimum(1.0, np.log(counts + 1) / np.log(64)) 
+    density_map[np.int_(lidar_pcl_top[:, 0]), np.int_(lidar_pcl_top[:, 1])] = normalizedCounts
+        
+    # assemble 3-channel bev-map from individual maps
+    bev_map = np.zeros((3, configs.bev_height, configs.bev_width))
+    bev_map[2, :, :] = density_map[:configs.bev_height, :configs.bev_width]  # r_map
+    bev_map[1, :, :] = height_map[:configs.bev_height, :configs.bev_width]  # g_map
+    bev_map[0, :, :] = intensity_map[:configs.bev_height, :configs.bev_width]  # b_map
+
+    # expand dimension of bev_map before converting into a tensor
+    s1, s2, s3 = bev_map.shape
+    bev_maps = np.zeros((1, s1, s2, s3))
+    bev_maps[0] = bev_map
+
+    bev_maps = torch.from_numpy(bev_maps)  # create tensor from birds-eye view
+    input_bev_maps = bev_maps.to(configs.device, non_blocking=True).float()
+    return input_bev_maps
