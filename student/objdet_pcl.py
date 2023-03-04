@@ -38,14 +38,11 @@ def show_pcl(pcl):
     ####### ID_S1_EX2 START #######     
     #######
     print("student task ID_S1_EX2")
-    # 下面部分要改一下!!!!!!!!
+
     # step 1 : initialize open3d with key callback and create window
     vis = o3d.visualization.VisualizerWithKeyCallback()
-    vis.create_window(window_name='Open3D', width=1920, height=1080, left=10, top=10, visible=True)
-
-    global idx
-    idx= True
-    vis.register_key_callback(262,right_click)
+    vis.create_window(window_name='Open3D', width=800, height=600, left=10, top=10, visible=True)
+    vis.register_key_callback(262,click)
     
     # step 2 : create instance of open3d point-cloud class
     pcd = o3d.geometry.PointCloud()
@@ -57,11 +54,14 @@ def show_pcl(pcl):
     vis.add_geometry(pcd)
     
     # step 5 : visualize point cloud and keep window open until right-arrow is pressed (key-code 262)    
-    while idx:
-        vis.poll_events()
-        vis.update_renderer()
+    vis.run()
     #######
     ####### ID_S1_EX2 END #######     
+
+    
+def click(vis):
+    print("clicked")
+    vis.close()
     
     
 # visualize range image
@@ -102,14 +102,7 @@ def show_range_image(frame, lidar_name):
     
     #######
     ####### ID_S1_EX1 END #######     
-    return img_range_intensity
-       
-
-def right_click(vis_lpc):
-    print('right click' + idx)
-    idx = False
-    return
-
+    return img_range_intensity      
 
 # create birds-eye view of lidar data
 def bev_from_pcl(lidar_pcl, configs):
