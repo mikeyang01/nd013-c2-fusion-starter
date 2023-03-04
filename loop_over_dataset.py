@@ -94,14 +94,14 @@ np.random.seed(10) # make random values predictable
 # exec_visualization = ['show_range_image'] 
 
 ##----ID_S1_EX2----
-exec_detection = []
-exec_tracking = []
-exec_visualization = ['show_pcl']
+# exec_detection = []
+# exec_tracking = []
+# exec_visualization = ['show_pcl']
 
 ##----ID_S2_EX1, ID_S2_EX2, & ID_S2_EX3----
-# exec_detection = ['bev_from_pcl'] 
-# exec_tracking = [] 
-# exec_visualization=[]
+exec_detection = ['bev_from_pcl'] 
+exec_tracking = [] 
+exec_visualization=[]
 
 ##----ID_S3_EX1 & ID_S3_EX2----
 # exec_detection = ['bev_from_pcl', 'detect_objects']
