@@ -41,7 +41,7 @@ def show_pcl(pcl):
 
     # step 1 : initialize open3d with key callback and create window
     vis = o3d.visualization.VisualizerWithKeyCallback()
-    vis.create_window(window_name='Open3D', width=800, height=600, left=100, top=100, visible=True)
+    vis.create_window(window_name='Open3D', width=800, height=600, left=30, top=30, visible=True)
     vis.register_key_callback(262,click)
     
     # step 2 : create instance of open3d point-cloud class
@@ -134,7 +134,7 @@ def bev_from_pcl(lidar_pcl, configs):
     lidar_pcl_cpy[:, 1] = np.abs(lidar_pcl_cpy[:,1]) #no negative
     
     # step 4 : visualize point-cloud using the function show_pcl from a previous task
-    show_pcl(lidar_pcl_cpy) # remove due to next project
+    # show_pcl(lidar_pcl_cpy) # remove due to next project
 
     #######
     ####### ID_S2_EX1 END #######     
@@ -167,7 +167,7 @@ def bev_from_pcl(lidar_pcl, configs):
     img_intensity = img_intensity.astype(np.uint8)
 
     # while 1 is true
-    while (0):
+    while (1):
             cv2.imshow('img_intensity', img_intensity)
             if cv2.waitKey(0):
                 break
