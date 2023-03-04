@@ -84,11 +84,36 @@ camera = None # init camera sensor object
 np.random.seed(10) # make random values predictable
 
 ## Selective execution and visualization
-exec_detection = ['bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
-exec_tracking = [] # options are 'perform_tracking'
-exec_visualization = ['show_objects_in_bev_labels_in_camera'] # options are 'show_range_image', 'show_bev', 'show_pcl', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
+##----ID_S1_EX1----
+#exec_detection = [] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+#exec_tracking = ['perform_tracking'] # options are 'perform_tracking' 
+#exec_visualization = ['show_tracks', 'make_tracking_movie'] # options are 'show_range_image', 'show_bev', 'show_pcl', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
+
+##----ID_S1_EX2----
+# exec_detection = []
+# exec_tracking = []
+# exec_visualization = ['show_pcl']
+
+##----ID_S2_EX1, ID_S2_EX2, & ID_S2_EX3----
+# exec_detection = ['bev_from_pcl'] 
+# exec_tracking = [] 
+# exec_visualization=[]
+
+##----ID_S3_EX1 & ID_S3_EX2----
+# exec_detection = ['bev_from_pcl', 'detect_objects']
+# exec_tracking = []
+# exec_visualization = ['show_objects_in_bev_labels_in_camera']
+
+##----ID_S4_EX1,ID_S4_EX3----
+exec_detection = ['bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance']
+exec_tracking = []
+exec_visualization = ['show_detection_performance']
+
 exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization)
 vis_pause_time = 0 # set pause time between frames in ms (0 = stop between frames until key is pressed)
+
+
+
 
 
 ##################
@@ -149,10 +174,6 @@ while True:
         else:
             if 'detect_objects' in exec_list:
                 print('detecting objects in lidar pointcloud')
-                
-                print('lidar_bev')
-                print(lidar_bev)
-
                 detections = det.detect_objects(lidar_bev, model_det, configs_det)
             else:
                 print('loading detected objects from result file')
@@ -285,7 +306,7 @@ while True:
 
 ## Evaluate object detection performance
 if 'show_detection_performance' in exec_list:
-    eval.compute_performance_stats(det_performance_all, configs_det)
+    eval.compute_performance_stats(det_performance_all)
 
 ## Plot RMSE for all tracks
 if 'show_tracks' in exec_list:
