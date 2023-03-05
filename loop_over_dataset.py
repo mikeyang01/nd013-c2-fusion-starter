@@ -117,9 +117,6 @@ exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization)
 vis_pause_time = 0 # set pause time between frames in ms (0 = stop between frames until key is pressed)
 
 
-
-
-
 ##################
 ## Perform detection & tracking over all selected frames
 
