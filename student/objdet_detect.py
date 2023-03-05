@@ -61,25 +61,16 @@ def load_configs_model(model_name='darknet', configs=None):
     elif model_name == 'fpn_resnet':
         ####### ID_S3_EX1-3 START #######     
         #######
-        ##参考SFA3D
+        ##reference: https://github.com/maudzung/SFA3D/blob/5f042b9d194b63d47d740c42ad04243b02c2c26a/sfa/config/train_config.py
         print("student task ID_S3_EX1-3")
         configs.arch = 'fpn_resnet'
         configs.saved_fn = 'fpn_resnet'
         configs.pretrained_path = 'tools/objdet_models/resnet/pretrained/fpn_resnet_18_epoch_300.pth'
         configs.k = 50
-        configs.conf_thresh = 0.5
-        configs.no_cuda = False
-        configs.gpu_idx = 0
-        configs.batch_size = 1
+        configs.batch_size = 2
         configs.num_samples = None
-        configs.num_workers = 1
-        configs.peak_thresh = 0.2
-        configs.save_test_output = False
-        configs.output_format = 'image'
-        configs.output_video_fn = 'out_fpn_resnet'
-        configs.output_width = 608
+        configs.num_workers = 4
         configs.pin_memory = True
-        configs.distributed = False
         configs.input_size = (608, 608)
         configs.hm_size = (152, 152)
         configs.down_ratio = 4
@@ -90,13 +81,15 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.num_center_offset = 2
         configs.num_z = 1
         configs.num_dim = 3
-        configs.num_direction = 2
-        configs.heads = {'hm_cen': configs.num_classes, 'cen_offset': configs.num_center_offset, 
-                         'direction': configs.num_direction, 'z_coor': configs.num_z,'dim': configs.num_dim}
+        configs.num_direction = 2  # sin, cos
+        configs.heads = {
+            'hm_cen': configs.num_classes, 
+            'cen_offset': configs.num_center_offset, 
+            'direction': configs.num_direction, 
+            'z_coor': configs.num_z,
+            'dim': configs.num_dim
+        }
         configs.num_input_features = 4
-
-        configs.model_path = os.path.join(parent_path, 'tools', 'objdet_models', 'resnet')
-        configs.pretrained_filename = os.path.join(configs.model_path, 'pretrained', 'fpn_resnet_18_epoch_300.pth')
         #######
         ####### ID_S3_EX1-3 END #######     
 

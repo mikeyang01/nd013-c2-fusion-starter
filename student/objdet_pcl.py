@@ -160,19 +160,17 @@ def bev_from_pcl(lidar_pcl, configs):
     ## step 4 : assign the intensity value of each unique entry in lidar_top_pcl to the intensity map 
     ##          make sure that the intensity is scaled in such a way that objects of interest (e.g. vehicles) are clearly visible    
     ##          also, make sure that the influence of outliers is mitigated by normalizing intensity on the difference between the max. and min. value within the point cloud
-    intensity_map[np.int_(lidar_pcl_top[:, 0]), np.int_(lidar_pcl_top[:, 1])] = lidar_pcl_top[:, 3] / (np(lidar_pcl_top[:, 3])-np.amin(lidar_pcl_top[:, 3]))
+    intensity_map[np.int_(lidar_pcl_top[:, 0]), np.int_(lidar_pcl_top[:, 1])] = lidar_pcl_top[:, 3] / (np.amax(lidar_pcl_top[:, 3])-np.amin(lidar_pcl_top[:, 3]))
 
     ## step 5 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background
-    img_intensity = intensity_map * 256
-    img_intensity = img_intensity.astype(np.uint8)
-
     # while 1 is true
     while (1):
-            cv2.imshow('img_intensity', img_intensity)
-            if cv2.waitKey(0):
-                break
-    cv2.destroyAllWindows()
-    
+        img_intensity = intensity_map * 256
+        img_intensity = img_intensity.astype(np.uint8)
+        cv2.imshow('img_intensity', img_intensity)
+        if cv2.waitKey(0):
+            break
+    cv2.destroyAllWindows()    
     #######
     ####### ID_S2_EX2 END ####### 
 
@@ -191,15 +189,14 @@ def bev_from_pcl(lidar_pcl, configs):
     ##          use the lidar_pcl_top data structure from the previous task to access the pixels of the height_map
     height_map[np.int_(lidar_pcl_top[:, 0]), np.int_(lidar_pcl_top[:, 1])] = lidar_pcl_top[:, 2] / float(np.abs(configs.lim_z[1] - configs.lim_z[0]))
 
-    ## step 3 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background
-    img_height = height_map * 256
-    img_height = img_intensity.astype(np.uint8)
-                
+    ## step 3 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background               
     # while 1 is true
-    while (1):
-            cv2.imshow('img_height', img_height)
-            if cv2.waitKey(0):
-                break
+    while (1):        
+        img_height = height_map * 256
+        img_height = img_intensity.astype(np.uint8)
+        cv2.imshow('img_height', img_height)
+        if cv2.waitKey(0):
+            break
     cv2.destroyAllWindows()       
     #######
     ####### ID_S2_EX3 END #######
