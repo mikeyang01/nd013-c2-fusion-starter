@@ -53,26 +53,26 @@ import misc.params as params
 data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
 # data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
 # data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
-show_only_frames = [50, 51] # show only frames in interval for debugging
+show_only_frames = [0, 200] # show only frames in interval for debugging
 
 ## Prepare Waymo Open Dataset file for loading
 data_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dataset', data_filename) # adjustable path in case this script is called from another working directory
 
-model = "darknet"
+model = "fpn_resnet"
 if model == "fpn_resnet":
-    folder_name = "resnet"
+    folder_name1 = "fpn-resnet"
+    folder_name2 = "resnet"
+
 else:
-    folder_name = "darknet"
+    folder_name1 = folder_name2 = "darknet"
     
 sequence = "1"	
-results_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'results/' + model + '/results_sequence_' + sequence + '_' + folder_name)
-
-# results_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'results')
+results_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'results/' + folder_name1 + '/results_sequence_' + sequence + '_' + folder_name2)
 datafile = WaymoDataFileReader(data_fullpath)
 datafile_iter = iter(datafile)  # initialize dataset iterator
 
 ## Initialize object detection
-configs_det = det.load_configs(model_name='darknet') # options are 'darknet', 'fpn_resnet'
+configs_det = det.load_configs(model_name='fpn_resnet') # options are 'darknet', 'fpn_resnet'
 model_det = det.create_model(configs_det)
 
 configs_det.use_labels_as_objects = False # True = use groundtruth labels as objects, False = use model-based detection
@@ -104,7 +104,7 @@ np.random.seed(10) # make random values predictable
 # exec_visualization=[]
 
 ##----ID_S3_EX1 & ID_S3_EX2----
-exec_detection = ['bev_from_pcl', 'detect_objects']
+exec_detection = ['detect_objects']
 exec_tracking = []
 exec_visualization = ['show_objects_in_bev_labels_in_camera']
 
@@ -158,6 +158,9 @@ while True:
             lidar_pcl = tools.pcl_from_range_image(frame, lidar_name)
         else:
             print('loading lidar point-cloud from result file')
+            print(results_fullpath)
+            print(data_filename)
+            print(cnt_frame)
             lidar_pcl = load_object_from_file(results_fullpath, data_filename, 'lidar_pcl', cnt_frame)
             
         ## Compute lidar birds-eye view (bev)

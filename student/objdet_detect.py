@@ -61,16 +61,18 @@ def load_configs_model(model_name='darknet', configs=None):
     elif model_name == 'fpn_resnet':
         ####### ID_S3_EX1-3 START #######     
         #######
-        ##reference: https://github.com/maudzung/SFA3D/blob/5f042b9d194b63d47d740c42ad04243b02c2c26a/sfa/config/train_config.py
+        ##reference: https://github.com/maudzung/SFA3D/blob/master/sfa/config/train_config.py
         print("student task ID_S3_EX1-3")
         configs.arch = 'fpn_resnet'
-        configs.saved_fn = 'fpn_resnet'
-        configs.pretrained_path = 'tools/objdet_models/resnet/pretrained/fpn_resnet_18_epoch_300.pth'
+        configs.saved_fn = 'fpn_resnet'               
+        configs.model_path = os.path.join(parent_path, 'tools', 'objdet_models', 'darknet')
+        configs.pretrained_filename = os.path.join(configs.model_path, 'pretrained', 'complex_yolov4_mse_loss.pth')
         configs.k = 50
         configs.batch_size = 2
         configs.num_samples = None
         configs.num_workers = 4
         configs.pin_memory = True
+        configs.conf_thresh = 0.5
         configs.input_size = (608, 608)
         configs.hm_size = (152, 152)
         configs.down_ratio = 4
@@ -131,7 +133,6 @@ def load_configs(model_name='fpn_resnet', configs=None):
 
 # create model according to selected model type
 def create_model(configs):
-
     # check for availability of model file
     assert os.path.isfile(configs.pretrained_filename), "No file at {}".format(configs.pretrained_filename)
 
@@ -146,7 +147,7 @@ def create_model(configs):
         ####### ID_S3_EX1-4 START #######     
         #######
         print("student task ID_S3_EX1-4")
-        num_layers = 18 #可以自定义
+        num_layers = 18 # failed on 16
         model = fpn_resnet.get_pose_net(num_layers = num_layers, 
                                         heads = configs.heads, 
                                         head_conv= configs.head_conv, 
@@ -158,7 +159,7 @@ def create_model(configs):
         assert False, 'Undefined model backbone'
 
     # load model weights
-    model.load_state_dict(torch.load(configs.pretrained_filename, map_location='cpu'))
+    model.load_state_dict(torch.load(configs.pretrained_filename, map_location='cpu'),strict=False)
     print('Loaded weights from {}\n'.format(configs.pretrained_filename))
 
     # set model to evaluation state
@@ -171,7 +172,6 @@ def create_model(configs):
 
 # detect trained objects in birds-eye view
 def detect_objects(input_bev_maps, model, configs):
-    print("detect_objects")
     # deactivate autograd engine during test to reduce memory usage and speed up computations
     with torch.no_grad():  
 
@@ -200,20 +200,22 @@ def detect_objects(input_bev_maps, model, configs):
             # decode output and perform post-processing
             
             ####### ID_S3_EX1-5 START #######     
-            ####### 出处:test.py
+            #######
+            # reference: https://github.com/maudzung/SFA3D/blob/master/sfa/test.py
             print("student task ID_S3_EX1-5")
             outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
             outputs['cen_offset'] = _sigmoid(outputs['cen_offset'])
             # detections size (batch_size, K, 10)
             detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
-                                outputs['dim'], K=40) #K=configs.k
+                                outputs['dim'], K=configs.k)
             detections = detections.cpu().numpy().astype(np.float32)
-            # print(detections)
             detections = post_processing(detections, configs)
-            detections = detections[0][1]         
+
+            # print line 1, 2nd row
+            detections = detections[0][1]
             
-            print('detections:')
-            print(detections)
+        print('detections:')
+        print(detections)
             #######
             ####### ID_S3_EX1-5 END #######                 
 
