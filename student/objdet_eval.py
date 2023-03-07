@@ -41,39 +41,37 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
     ious = []
     for label, valid in zip(labels, labels_valid):
         matches_lab_det = []
-        if valid: # exclude all labels from statistics which are not considered valid
-            
+        if valid: 
+            # exclude all labels from statistics which are not considered valid            
             # compute intersection over union (iou) and distance between centers
 
-            ####### ID_S4_EX1 START #######     
+            ####### ID_S4_EX1 START #######
             #######
             print("student task ID_S4_EX1 ")
 
             ## step 1 : extract the four corners of the current label bounding-box
-            box = label.box
-            box_1 = tools.compute_box_corners(box.center_x, box.center_y, box.width, box.length, box.heading)
+            lbox = label.box
+            lbox_corners = tools.compute_box_corners(lbox.center_x, lbox.center_y, lbox.width, lbox.length, lbox.heading)
             
             ## step 2 : loop over all detected objects
             for detection in detections:
                 
                 ## step 3 : extract the four corners of the current detection
-                _id, x, y,z, _h, w, l, yaw = detection
-                box_2 = tools.compute_box_corners(x, y, w, l, yaw)
+                id, det_x, det_y, det_z, det_h, det_w, det_l , det_yaw = detection
+                det_corners = tools.compute_box_corners(det_x, det_y, det_w, det_l, det_yaw)
                 
                 ## step 4 : computer the center distance between label and detection bounding-box in x, y, and z
-                dist_x = np.array(box.center_x - x).item()
-                dist_y = np.array(box.center_y - y).item()
-                dist_z = np.array(box.center_z - z).item()
+                dist_x = lbox.center_x - det_x
+                dist_y = lbox.center_y - det_y
+                dist_z = lbox.center_z - det_z
                 
                 ## step 5 : compute the intersection over union (IOU) between label and detection bounding-box
-                try:
-                    poly_1 = Polygon(box_1)
-                    poly_2 = Polygon(box_2)
-                    intersection = poly_1.intersection(poly_2).area 
-                    union = poly_1.union(poly_2).area
-                    iou = intersection / union
-                except Exception as err:
-                    print("Error in computation",err)                
+                l_polygon = Polygon(lbox_corners)
+                det_polygon = Polygon(det_corners)
+
+                intersection = l_polygon.intersection(det_polygon).area 
+                union = l_polygon.union(det_polygon).area
+                iou = intersection / union
                 
                 ## step 6 : if IOU exceeds min_iou threshold, store [iou,dist_x, dist_y, dist_z] in matches_lab_det and increase the TP count
                 if iou > min_iou:
