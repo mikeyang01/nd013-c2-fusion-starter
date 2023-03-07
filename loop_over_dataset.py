@@ -111,17 +111,17 @@ np.random.seed(10) # make random values predictable
 
 ##----ID_S4_EX1----
 # use darknet
-show_only_frames = [50, 51]
-exec_detection = ['detect_objects', 'validate_object_labels', 'measure_detection_performance']
-exec_tracking = []
-exec_visualization = ['show_detection_performance']
-
-##----ID_S4_EX3----
-# use darknet
-# show_only_frames = [50, 150]
+# show_only_frames = [50, 51]
 # exec_detection = ['detect_objects', 'validate_object_labels', 'measure_detection_performance']
 # exec_tracking = []
 # exec_visualization = ['show_detection_performance']
+
+##----ID_S4_EX3----
+# use darknet
+show_only_frames = [50, 60] # default 50-150
+exec_detection = ['detect_objects', 'validate_object_labels', 'measure_detection_performance']
+exec_tracking = []
+exec_visualization = ['show_detection_performance']
 
 
 exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization)

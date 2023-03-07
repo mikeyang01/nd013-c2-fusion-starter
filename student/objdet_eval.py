@@ -99,8 +99,7 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
 
     ## step 2 : compute the number of false negatives
     false_negatives = 0
-    true_positives=len(ious)
-    false_negatives = all_positives - true_positives
+    false_negatives = all_positives - true_positives ## number of correctly detected objects
     
     ## step 3 : compute the number of false positives
     false_positives = 0
@@ -128,26 +127,30 @@ def compute_performance_stats(det_performance_all):
         pos_negs.append(item[2])
         pos_negs_arr = np.asarray(pos_negs)
 
+        
     ####### ID_S4_EX3 START #######     
     #######    
     print('student task ID_S4_EX3')
 
     ## step 1 : extract the total number of positives, true positives, false negatives and false positives
-    positives = sum(pos_negs_arr[:,0])
-    true_positives = sum(pos_negs_arr[:,1])
-    false_negatives = sum(pos_negs_arr[:,2])
-    false_positives = sum(pos_negs_arr[:,3])
+    positives = np.sum(pos_negs_arr[:,0])
+    true_positives = np.sum(pos_negs_arr[:,1])
+    false_negatives = np.sum(pos_negs_arr[:,2])
+    false_positives = np.sum(pos_negs_arr[:,3])
     
     ## step 2 : compute precision
+    # Precision = TP/(TP+FF)
     precision = 0.0
-    precision = true_positives /float(true_positives + false_positives)   
+    precision = true_positives / float(true_positives + false_positives) # float avoid invalid value in long_scalars
     
     ## step 3 : compute recall 
+    # Recall = TP/(TP+FN)
     recall = 0.0
-    recall = true_positives / float(true_positives + false_negatives)    
+    recall = true_positives / float(true_positives + false_negatives)
     
     #######    
     ####### ID_S4_EX3 END #######     
+    
     print('precision = ' + str(precision) + ", recall = " + str(recall))   
 
     # serialize intersection-over-union and deviations in x,y,z
