@@ -86,9 +86,9 @@ def show_range_image(frame, lidar_name):
     ri_range = ri_range * 255 / (np.amax(ri_range) - np.amin(ri_range))
     img_range = ri_range.astype(np.uint8)
     
-    # 这块还得再问问!!!!!!!!!!!
     # step 5 : map the intensity channel onto an 8-bit scale
     # normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
+    # Need more investigation...
     ri_intensity = ri[:,:,1]
     percentile_1 = percentile(ri_intensity,1)
     percentile_99 = percentile(ri_intensity,99)
@@ -163,8 +163,8 @@ def bev_from_pcl(lidar_pcl, configs):
     intensity_map[np.int_(lidar_pcl_top[:, 0]), np.int_(lidar_pcl_top[:, 1])] = lidar_pcl_top[:, 3] / (np.amax(lidar_pcl_top[:, 3])-np.amin(lidar_pcl_top[:, 3]))
 
     ## step 5 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background
-    # while 1 is true
-    while (1):
+    # while 1 is true, 0 means not show image
+    while (0):
         img_intensity = intensity_map * 256
         img_intensity = img_intensity.astype(np.uint8)
         cv2.imshow('img_intensity', img_intensity)
@@ -191,7 +191,7 @@ def bev_from_pcl(lidar_pcl, configs):
 
     ## step 3 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background               
     # while 1 is true
-    while (1):        
+    while (0):        
         img_height = height_map * 256
         img_height = img_intensity.astype(np.uint8)
         cv2.imshow('img_height', img_height)
