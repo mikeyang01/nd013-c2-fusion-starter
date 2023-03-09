@@ -129,5 +129,148 @@ Parts of this project are based on the following repositories:
 - [Complex-YOLO: Real-time 3D Object Detection on Point Clouds](https://github.com/maudzung/Complex-YOLOv4-Pytorch)
 
 
-## License
-[License](LICENSE.md)
+# Writeup: Track 3D-Objects Over Time
+## 1. Short Recap 
+Write a short recap of the four tracking steps and what you implemented there (filter, track management, association, camera fusion). Which results did you achieve? Which part of the project was most difficult for you to complete, and why?
+### Step 1 : Compute Lidar Point-Cloud from Range Image
+The 1st step of this project is to visualize range image channels (ID_S1_EX1), 
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [0, 1]
+exec_visualization = ['show_range_image']
+```
+In the Waymo Open dataset, lidar data is stored as a range image. Therefore, this task is about extracting two of the data channels within the range image, which are "range" and "intensity", 
+Firstly, convert the floating-point data to an 8-bit integer value range. 
+Then, use OpenCV library to stack the range and intensity image vertically and visualize it.
+Result:
+<img src="img/range and intensity image.jpg"/>
+The Second task is to Visualize lidar point-cloud (ID_S1_EX2),
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord'
+show_only_frames = [0, 200]
+exec_visualization = ['show_pcl']
+```
+The goal of this task is to use the Open3D library to display the lidar point-cloud in a 3d viewer in order to develop a feel for the nature of lidar point-clouds.
+Result:
+<img src="img/point cloud visualization.jpg"/>
+
+### Step 2 : Create Birds-Eye View from Lidar PCL
+The second step is to Convert sensor coordinates to BEV-map coordinates (ID_S2_EX1)
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [0, 1]
+exec_detection = ['pcl_from_rangeimage','bev_from_pcl']
+exec_tracking = []
+exec_visualization = []
+```
+The goal of this task is to perform the first step in creating a birds-eye view (BEV) perspective of the lidar point-cloud. 
+Result:
+<img src="img/visualization into BEV map coordinates.jpg"/>
+The 2nd task for step2 is to Compute intensity layer of the BEV map (ID_S2_EX2)
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [0, 1]
+exec_detection = ['pcl_from_rangeimage','bev_from_pcl']
+exec_tracking = []
+exec_visualization = []
+```
+The goal of this task is to fill the "intensity" channel of the BEV map with data from the point-cloud. In order to do so, I identified all points with the same (x,y)-coordinates within the BEV map and then assigned the intensity value of the top-most lidar point to the respective BEV pixel. 
+Result:
+<img src="img/intensity layer from the BEV map.jpg"/>
+The 3rd task of Step 2 is to Compute height layer of the BEV map (ID_S2_EX3)
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [0, 1]
+exec_detection = ['pcl_from_rangeimage','bev_from_pcl']
+exec_tracking = []
+exec_visualization = []
+```
+The goal of this task is to fill the "height" channel of the BEV map with data from the point-cloud. In order to do so, I use the sorted and pruned point-cloud lidar_pcl_top from the previous task and normalized the height in each BEV map pixel by the difference between max. and min. 
+Result:
+<img src="img/height layer from the BEV map.jpg"/>
+
+
+### Step 3 : Model-based Object Detection in BEV Image
+The 1st task for Step 3 is to Add a second model from a GitHub repo (ID_S3_EX1)
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [50, 51]
+exec_detection = ['pcl_from_rangeimage', 'load_image', 'bev_from_pcl', 'detect_objects']
+exec_tracking = []
+exec_visualization = ['show_objects_in_bev_labels_in_camera']
+configs_det = det.load_configs(model_name="fpn_resnet")
+```
+The goal of this task is to illustrate how a new model can be integrated into an existing framework. 
+The detection results is as follows:
+<img src="img/detections data.jpg"/>
+The 2nd task is to Extract 3D bounding boxes from model response (ID_S3_EX2)
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [50, 51]
+exec_detection = ['pcl_from_rangeimage', 'load_image', 'bev_from_pcl', 'detect_objects']
+exec_tracking = []
+exec_visualization = ['show_objects_in_bev_labels_in_camera']
+configs_det = det.load_configs(model_name="fpn_resnet")
+```
+This task is about detecting objects and the result will be returned with coordinates and properties in the BEV coordinate space. The result is as follows:
+<img src="img/3D bounding boxes added to the images.jpg"/>
+
+
+### Step 4 : Performance Evaluation for Object Detection
+The 1st task for Step 4 is to Compute intersection-over-union between labels and detections (ID_S4_EX1)
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [50, 51]
+exec_detection = ['pcl_from_rangeimage', 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance']
+exec_tracking = []
+exec_visualization = ['show_detection_performance']
+configs_det = det.load_configs(model_name="darknet")
+```
+The goal of this task is to find pairings between ground-truth labels and detections, so that we can determine wether an object has been missed (false negative), successfully detected (true positive) or has been falsely reported (false positive).
+
+Based on the labels within the Waymo Open Dataset, I computed the geometrical overlap between the bounding boxes of labels and detected objects and determine the percentage of this overlap in relation to the area of the bounding boxes. 
+The result is as following:
+```
+ious:
+[0.8234346907261101, 0.8883709520530157]
+center_devs:
+[[tensor(0.1402), tensor(-0.0197), 1.0292643213596193], [tensor(-0.0835), tensor(0.0698), 0.8291298942401681]]
+```
+The 2nd task is about Computing false-negatives and false-positives (ID_S4_EX2)
+In file loop_over_dataset.py, I set the attributes for code execution in the following way:
+* show_only_frames is from 50 to 100, if i set the fames bigger, the computation may cost a lot time.
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord
+show_only_frames = [50, 100]
+exec_detection = ['pcl_from_rangeimage', 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance']
+exec_tracking = []
+exec_visualization = ['show_detection_performance']
+configs_det = det.load_configs(model_name="darknet")
+```
+Based on the pairings between ground-truth labels and detected objects, the goal of this task is to determine the number of false positives and false negatives for the current frame. 
+After processed the specific frames, the results are in the following Graphing performance metrics.
+<img src="img/Graphing performance metrics.jpg">
+
+## 2. fusion vs lidar-only
+Do you see any benefits in camera-lidar fusion compared to lidar-only tracking (in theory and in your concrete results)? 
+1. Data noise can be reduced by averaging two uncorrelated sensors.
+2. Camera-lidar fusion can increase coverage. One camera can only see a limit area of the environment, but the lidar can see much wider area than camera. Camera-lidar fusion can create a more wider and accurate results.
+
+## 3. Challenges
+Which challenges will a sensor fusion system face in real-life scenarios? Did you see any of these challenges in the project?
+1. The dataset for testing and training is made in daytime, which has a good sunshine. At night, our system may face Challenges due to the less light.
+2. In real-life scenarios, the weather condition has many types, such as froggy, rainy, snowy. This can impact lidar and camera a lot. 
+
+## 4. Improvements
+Can you think of ways to improve your tracking results in the future?
+1. Use larger dataset: A bigger dataset can cover more conditions in the real-life which may lead a better results
+2. Implement more advanced framework such as YOLOv8, a NEW cutting-edge, state-of-the-art model.
+3. Change parameters to get a lower Root-mean-square deviation.
