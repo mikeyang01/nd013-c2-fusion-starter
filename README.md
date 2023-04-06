@@ -189,7 +189,8 @@ exec_visualization = []
 The goal of this task is to perform the first step in creating a birds-eye view (BEV) perspective of the lidar point-cloud. <br/>
 
 Result:<br/>
-<img src="img/visualization into BEV map coordinates.jpg"/>
+<img src="img/visualization into BEV map coordinates.jpg"/><br/>
+
 The 2nd task for step2 is to Compute intensity layer of the BEV map (ID_S2_EX2)
 In file loop_over_dataset.py, I set the attributes for code execution in the following way:
 ```
