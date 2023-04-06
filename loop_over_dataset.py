@@ -89,39 +89,43 @@ camera = None # init camera sensor object
 np.random.seed(10) # make random values predictable
 
 ##----ID_S1_EX1----
+# show_only_frames = [0, 1]
 # exec_detection = []
 # exec_tracking = []
 # exec_visualization = ['show_range_image'] 
 
 ##----ID_S1_EX2----
+# show_only_frames = [0, 200]
 # exec_detection = []
 # exec_tracking = []
 # exec_visualization = ['show_pcl']
 
 ##----ID_S2_EX1, ID_S2_EX2, & ID_S2_EX3----
-# exec_detection = ['bev_from_pcl'] 
+# show_only_frames = [0, 200]
+# exec_detection = ['pcl_from_rangeimage','bev_from_pcl'] 
 # exec_tracking = [] 
 # exec_visualization=[]
 
 ##----ID_S3_EX1 & ID_S3_EX2----
 # use fpn_resnet
-# exec_detection = ['detect_objects']
+# show_only_frames = [100, 101]
+# exec_detection = ['pcl_from_rangeimage', 'load_image','bev_from_pcl', 'detect_objects']
 # exec_tracking = []
 # exec_visualization = ['show_objects_in_bev_labels_in_camera']
 
 ##----ID_S4_EX1----
 # use darknet
-# show_only_frames = [50, 51]
-# exec_detection = ['detect_objects', 'validate_object_labels', 'measure_detection_performance']
-# exec_tracking = []
-# exec_visualization = ['show_detection_performance']
+show_only_frames = [50, 100]
+exec_detection = ['pcl_from_rangeimage', 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance']
+exec_tracking = []
+exec_visualization = ['show_detection_performance']
 
 ##----ID_S4_EX3----
 # use darknet
-show_only_frames = [50, 60] # default 50-150
-exec_detection = ['detect_objects', 'validate_object_labels', 'measure_detection_performance']
-exec_tracking = []
-exec_visualization = ['show_detection_performance']
+# show_only_frames = [50, 60] # default 50-150
+# exec_detection = ['detect_objects', 'validate_object_labels', 'measure_detection_performance']
+# exec_tracking = []
+# exec_visualization = ['show_detection_performance']
 
 
 exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization)
