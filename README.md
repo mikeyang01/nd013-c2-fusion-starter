@@ -152,7 +152,7 @@ data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_ca
 show_only_frames = [0, 200]
 exec_visualization = ['show_pcl']
 ```
-The goal of this task is to use the Open3D library to display the lidar point-cloud in a 3d viewer in order to develop a feel for the nature of lidar point-clouds.
+The goal of this task is to use the Open3D library to display the lidar point-cloud in a 3d viewer in order to develop a feel for the nature of lidar point-clouds.<br/>
 Result:
 <img src="img/point cloud visualization.jpg"/>
 
@@ -199,7 +199,7 @@ exec_detection = ['pcl_from_rangeimage','bev_from_pcl']
 exec_tracking = []
 exec_visualization = []
 ```
-The goal of this task is to fill the "intensity" channel of the BEV map with data from the point-cloud. In order to do so, I identified all points with the same (x,y)-coordinates within the BEV map and then assigned the intensity value of the top-most lidar point to the respective BEV pixel. 
+The goal of this task is to fill the "intensity" channel of the BEV map with data from the point-cloud. In order to do so, I identified all points with the same (x,y)-coordinates within the BEV map and then assigned the intensity value of the top-most lidar point to the respective BEV pixel. <br/>
 Result:
 <img src="img/intensity layer from the BEV map.jpg"/>
 The 3rd task of Step 2 is to Compute height layer of the BEV map (ID_S2_EX3)
@@ -211,7 +211,7 @@ exec_detection = ['pcl_from_rangeimage','bev_from_pcl']
 exec_tracking = []
 exec_visualization = []
 ```
-The goal of this task is to fill the "height" channel of the BEV map with data from the point-cloud. In order to do so, I use the sorted and pruned point-cloud lidar_pcl_top from the previous task and normalized the height in each BEV map pixel by the difference between max. and min. 
+The goal of this task is to fill the "height" channel of the BEV map with data from the point-cloud. In order to do so, I use the sorted and pruned point-cloud lidar_pcl_top from the previous task and normalized the height in each BEV map pixel by the difference between max. and min.<br/> 
 Result:
 <img src="img/height layer from the BEV map.jpg"/>
 
@@ -228,7 +228,7 @@ exec_visualization = ['show_objects_in_bev_labels_in_camera']
 configs_det = det.load_configs(model_name="fpn_resnet")
 ```
 The goal of this task is to illustrate how a new model can be integrated into an existing framework. 
-The detection results is as follows:
+The detection results is as follows:<br/>
 <img src="img/detections data.jpg"/>
 The 2nd task is to Extract 3D bounding boxes from model response (ID_S3_EX2)
 In file loop_over_dataset.py, I set the attributes for code execution in the following way:
@@ -240,7 +240,7 @@ exec_tracking = []
 exec_visualization = ['show_objects_in_bev_labels_in_camera']
 configs_det = det.load_configs(model_name="fpn_resnet")
 ```
-This task is about detecting objects and the result will be returned with coordinates and properties in the BEV coordinate space. The result is as follows:
+This task is about detecting objects and the result will be returned with coordinates and properties in the BEV coordinate space. The result is as follows:<br/>
 <img src="img/3D bounding boxes added to the images.jpg"/>
 
 
@@ -277,7 +277,7 @@ exec_visualization = ['show_detection_performance']
 configs_det = det.load_configs(model_name="darknet")
 ```
 Based on the pairings between ground-truth labels and detected objects, the goal of this task is to determine the number of false positives and false negatives for the current frame. 
-After processed the specific frames, the results are in the following Graphing performance metrics.
+After processed the specific frames, the results are in the following Graphing performance metrics.<br/>
 <img src="img/Graphing performance metrics.jpg">
 
 ## 2. fusion vs lidar-only
