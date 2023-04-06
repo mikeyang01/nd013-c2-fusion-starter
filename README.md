@@ -156,6 +156,26 @@ The goal of this task is to use the Open3D library to display the lidar point-cl
 Result:
 <img src="img/point cloud visualization.jpg"/>
 
+The following shows vehicles with varying degrees of visibility in the point-cloud.
+
+Car with front bumper and front wind shield.
+<img src="img/front bumper.jpg"/>
+
+Top view of the car, we can see the roof of the cars.
+<img src="img/top view.jpg"/>
+
+Side view of the car, we can see tires and back bumper.
+<img src="img/side view.jpg"/>
+
+Another side view of the car, we can see tires and back bumper, and car body shape.
+<img src="img/car shape.jpg"/>
+
+Front view of the car, we can see tires and back bumper, and back wind shield.
+<img src="img/back wind shield.jpg"/>
+
+From bird-eye view, we can identify the cars easily.
+<img src="img/whole body.jpg"/>
+
 ### Step 2 : Create Birds-Eye View from Lidar PCL
 The second step is to Convert sensor coordinates to BEV-map coordinates (ID_S2_EX1)
 In file loop_over_dataset.py, I set the attributes for code execution in the following way:
