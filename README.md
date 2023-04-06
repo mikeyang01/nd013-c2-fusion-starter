@@ -143,7 +143,7 @@ exec_visualization = ['show_range_image']
 In the Waymo Open dataset, lidar data is stored as a range image. Therefore, this task is about extracting two of the data channels within the range image, which are "range" and "intensity", 
 Firstly, convert the floating-point data to an 8-bit integer value range. 
 Then, use OpenCV library to stack the range and intensity image vertically and visualize it.
-Result:
+Result:<br/>
 <img src="img/range and intensity image.jpg"/>
 The Second task is to Visualize lidar point-cloud (ID_S1_EX2),
 In file loop_over_dataset.py, I set the attributes for code execution in the following way:
@@ -153,7 +153,7 @@ show_only_frames = [0, 200]
 exec_visualization = ['show_pcl']
 ```
 The goal of this task is to use the Open3D library to display the lidar point-cloud in a 3d viewer in order to develop a feel for the nature of lidar point-clouds.<br/>
-Result:
+Result:<br/>
 <img src="img/point cloud visualization.jpg"/>
 
 The following shows vehicles with varying degrees of visibility in the point-cloud.
@@ -186,9 +186,9 @@ exec_detection = ['pcl_from_rangeimage','bev_from_pcl']
 exec_tracking = []
 exec_visualization = []
 ```
-The goal of this task is to perform the first step in creating a birds-eye view (BEV) perspective of the lidar point-cloud. 
+The goal of this task is to perform the first step in creating a birds-eye view (BEV) perspective of the lidar point-cloud. <br/>
 
-Result:
+Result:<br/>
 <img src="img/visualization into BEV map coordinates.jpg"/>
 The 2nd task for step2 is to Compute intensity layer of the BEV map (ID_S2_EX2)
 In file loop_over_dataset.py, I set the attributes for code execution in the following way:
@@ -200,7 +200,7 @@ exec_tracking = []
 exec_visualization = []
 ```
 The goal of this task is to fill the "intensity" channel of the BEV map with data from the point-cloud. In order to do so, I identified all points with the same (x,y)-coordinates within the BEV map and then assigned the intensity value of the top-most lidar point to the respective BEV pixel. <br/>
-Result:
+Result:<br/>
 <img src="img/intensity layer from the BEV map.jpg"/>
 The 3rd task of Step 2 is to Compute height layer of the BEV map (ID_S2_EX3)
 In file loop_over_dataset.py, I set the attributes for code execution in the following way:
@@ -212,7 +212,7 @@ exec_tracking = []
 exec_visualization = []
 ```
 The goal of this task is to fill the "height" channel of the BEV map with data from the point-cloud. In order to do so, I use the sorted and pruned point-cloud lidar_pcl_top from the previous task and normalized the height in each BEV map pixel by the difference between max. and min.<br/> 
-Result:
+Result:<br/>
 <img src="img/height layer from the BEV map.jpg"/>
 
 
