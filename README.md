@@ -187,6 +187,7 @@ exec_tracking = []
 exec_visualization = []
 ```
 The goal of this task is to perform the first step in creating a birds-eye view (BEV) perspective of the lidar point-cloud. 
+
 Result:
 <img src="img/visualization into BEV map coordinates.jpg"/>
 The 2nd task for step2 is to Compute intensity layer of the BEV map (ID_S2_EX2)
